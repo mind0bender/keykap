@@ -195,16 +195,26 @@ export default function Home(): JSX.Element {
               </div>
             </div>
             <div className={`flex justify-end w-full`}>
-              <button
-                onClick={reset}
-                className={`flex justify-center items-center text-center gap-1 px-4 py-2 border border-orange-400 bg-orange-100 text-sm`}
-                type="reset">
-                <RestartAltRounded fontSize={"small"} />
-                <span>Reset</span>
-              </button>
+              <div
+                className={`active:translate-y-1 flex flex-col justify-center items-center`}>
+                <button
+                  onClick={reset}
+                  className={`border-b peer flex justify-center items-center text-center gap-1 px-4 py-2 border border-orange-400 bg-orange-100 text-sm duration-100`}
+                  type="reset">
+                  <RestartAltRounded fontSize={"small"} />
+                  <span>Reset</span>
+                </button>
+                <div
+                  className={`w-full border-orange-500 peer-active:border-transparent border-t-[3px] duration-100`}
+                />
+              </div>
             </div>
           </div>
-          <VirtualKeyboard pressed={keysPressed} />
+          <VirtualKeyboard
+            className={`py-10`}
+            supposedChar={supposed?.[typed.length - 1]}
+            pressed={keysPressed}
+          />
         </div>
       </div>
     </main>
