@@ -1,11 +1,11 @@
 import { PropsWithChildren } from "react";
-import Hint from "./hint";
+import Hint, { HintProps } from "./hint";
 
 interface LettersProps extends PropsWithChildren {
   active?: boolean;
   passed?: boolean;
   correct?: boolean;
-  hint?: string | null;
+  hint?: HintProps;
 }
 
 function Letter({
@@ -23,7 +23,7 @@ function Letter({
         !correct && "underline text-red-500"
       } relative decoration-wavy decoration-red-500`}>
       {children}
-      {!correct && <Hint>{hint}</Hint>}
+      {!correct && <Hint {...hint} />}
     </span>
   );
 }
