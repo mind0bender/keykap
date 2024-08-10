@@ -13,18 +13,19 @@ import {
 } from "react";
 import Letter from "./components/letter";
 import Navbar from "./components/navbar";
-import wordlist from "./components/helper/wordlist.json";
+import wordlist from "./helper/wordlist.json";
 import {
   RestartAltRounded,
   SpeedRounded,
   TimerRounded,
-  VolumeMuteRounded,
   VolumeOffRounded,
   VolumeUpRounded,
 } from "@mui/icons-material";
+import VirtualKeyboard from "./components/virtual_keyboard";
 
 export default function Home(): JSX.Element {
   const [typed, setTyped] = useState<string>("");
+  const [keysPressed, setKeysPressed] = useState<string[]>([]);
 
   const [supposed, setSupposed] = useState<string>();
 
@@ -91,6 +92,7 @@ export default function Home(): JSX.Element {
       // impliment caps and other modifiers
       // const caps:boolean = e.getModifierState && e.getModifierState("CapsLock");
       // console.log(caps);
+      setKeysPressed((pKP: string[]): string[] => [...pKP, e.key]);
       tapAudio.current!.currentTime = 0;
       tapAudio.current!.play();
       switch (e.key) {
@@ -110,11 +112,20 @@ export default function Home(): JSX.Element {
     [reset]
   );
 
+  const keyUpHandler: KeyboardEventHandler = useCallback(
+    (e: KeyboardEvent): void => {
+      setKeysPressed((pKP: string[]): string[] =>
+        pKP.filter((key: string): boolean => e.key != key)
+      );
+    },
+    []
+  );
+
   return (
     <main className={`min-h-screen`}>
       <Navbar />
       <div className={`w-full flex justify-center items-center`}>
-        <div className="flex max-w-4xl lg:max-w-6xl flex-col items-center justify-center p-16">
+        <div className="flex w-full max-w-4xl lg:max-w-6xl flex-col items-center justify-center p-16">
           <div
             className={`text-3xl flex items-center justify-between py-4 px-2 w-full font-semibold text-orange-950`}>
             <span>Typing Test</span>
@@ -133,6 +144,7 @@ export default function Home(): JSX.Element {
             className={`flex flex-col justify-center items-center bg-orange-200 rounded-sm shadow-lg px-10 py-8 gap-4 w-full container`}>
             <textarea
               onKeyDown={keyDownHandler}
+              onKeyUp={keyUpHandler}
               ref={area}
               autoFocus
               value={typed}
@@ -192,6 +204,7 @@ export default function Home(): JSX.Element {
               </button>
             </div>
           </div>
+          <VirtualKeyboard pressed={keysPressed} />
         </div>
       </div>
     </main>
