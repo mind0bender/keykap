@@ -17,7 +17,7 @@ function Letter({
 }: LettersProps): JSX.Element {
   return (
     <span
-      className={`${active && "border border-b-4 border-orange-900"} ${
+      className={`${active && "border border-b-4 border-primary-900"} ${
         passed && "text-stone-500"
       } ${
         !correct && "underline text-red-500"

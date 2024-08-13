@@ -21,10 +21,10 @@ function VirtualKeyKap({
     <div
       className={`${pressed ? "border-b-0 translate-y-1" : "border-b-4"} ${
         gaming && "ring"
-      } relative border-orange-400 ring-white rounded-md duration-300`}>
+      } relative border-primary-400 ring-white rounded-md duration-150`}>
       <kbd
         className={`w-12 flex flex-col justify-center items-center text-xl rounded-md aspect-square ${
-          pressed ? (wrong ? "bg-red-400" : "bg-orange-300") : "bg-orange-200"
+          pressed ? (wrong ? "bg-red-400" : "bg-primary-300") : "bg-primary-200"
         }`}>
         <span className={`absolute text-sm w-full left-2 top-2`}>
           {shifted ? shiftedChildren && children : shiftedChildren}

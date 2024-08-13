@@ -37,9 +37,28 @@ export default function Home(): JSX.Element {
 
   const [isMuted, setIsMuted] = useState<boolean>(false);
 
-  const [timer, setTimer] = useState<number>(0);
+  const timerMaxValue: MutableRefObject<number> = useRef<number>(30);
+  const [timer, setTimer] = useState<number>(timerMaxValue.current);
   const timerIntervalRef: MutableRefObject<NodeJS.Timeout | null> =
     useRef<NodeJS.Timeout | null>(null);
+
+  const stopTimer: () => void = useCallback((): void => {
+    timerIntervalRef.current && clearInterval(timerIntervalRef.current);
+  }, []);
+  const startTimer: () => void = useCallback((): void => {
+    const startedAt: Date = new Date();
+    const shouldEndAt: Date = new Date(startedAt);
+    shouldEndAt.setSeconds(startedAt.getSeconds() + timerMaxValue.current);
+    timerIntervalRef.current = setInterval((): void => {
+      const now: Date = new Date();
+      const newTimeVal: number = now.getSeconds() - shouldEndAt.getSeconds();
+      if (!newTimeVal) {
+        now.getSeconds() - shouldEndAt.getSeconds();
+        stopTimer();
+      }
+      setTimer(newTimeVal);
+    }, 1000);
+  }, [stopTimer]);
 
   const DEFAULT_MIN_WORD_COUNT: number = 12;
   const DEFAULT_MAX_WORD_COUNT: number = 18;
@@ -58,9 +77,11 @@ export default function Home(): JSX.Element {
     return randomWords.join(" ");
   }
   const reset: () => void = useCallback((): void => {
+    stopTimer();
+    setTimer(timerMaxValue.current);
     setTyped("");
     setSupposed(getRandomSentence());
-  }, []);
+  }, [stopTimer]);
 
   const area: RefObject<HTMLTextAreaElement> =
     useRef<HTMLTextAreaElement>(null);
@@ -93,7 +114,8 @@ export default function Home(): JSX.Element {
       // const caps:boolean = e.getModifierState && e.getModifierState("CapsLock");
       // console.log(caps);
       setKeysPressed((pKP: string[]): string[] => [...pKP, e.key]);
-      tapAudio.current!.currentTime = 0;
+      if (tapAudio.current!.readyState > tapAudio.current!.HAVE_CURRENT_DATA)
+        tapAudio.current!.currentTime = 0;
       tapAudio.current!.play();
       switch (e.key) {
         case "Tab":
@@ -127,7 +149,7 @@ export default function Home(): JSX.Element {
       <div className={`w-full flex justify-center items-center`}>
         <div className="flex w-full max-w-4xl lg:max-w-6xl flex-col items-center justify-center p-16">
           <div
-            className={`text-3xl flex items-center justify-between py-4 px-2 w-full font-semibold text-orange-950`}>
+            className={`text-3xl flex items-center justify-between py-4 px-2 w-full font-semibold text-primary-950`}>
             <span>Typing Test</span>
             <button
               onClick={(): void => {
@@ -141,7 +163,7 @@ export default function Home(): JSX.Element {
             </button>
           </div>
           <div
-            className={`flex flex-col justify-center items-center bg-orange-200 rounded-sm shadow-lg px-10 py-8 gap-4 w-full container`}>
+            className={`flex flex-col justify-center items-center bg-primary-200 rounded-sm shadow-lg px-10 py-8 gap-4 w-full container`}>
             <textarea
               onKeyDown={keyDownHandler}
               onKeyUp={keyUpHandler}
@@ -150,6 +172,12 @@ export default function Home(): JSX.Element {
               value={typed}
               onChange={(e: ChangeEvent<HTMLTextAreaElement>): void => {
                 // checking for max-incorrect-word-length-allowed
+                if (!typed && e.target.value) {
+                  startTimer();
+                }
+                if (typed.length === supposed?.length) {
+                  stopTimer();
+                }
                 const newTypedWordList: string[] = e.target.value.split(" ");
                 const lastWord: string =
                   newTypedWordList[newTypedWordList.length - 1];
@@ -182,7 +210,7 @@ export default function Home(): JSX.Element {
                   );
                 })}
             </code>
-            <div className={`flex justify-between w-full text-orange-950`}>
+            <div className={`flex justify-between w-full text-primary-950`}>
               <div className={`flex justify-center items-center gap-1`}>
                 <SpeedRounded fontSize={"small"} />
                 <span className={`font-bold text-2xl`}>120</span>
@@ -190,7 +218,7 @@ export default function Home(): JSX.Element {
               </div>
               <div className={`flex justify-center items-center`}>
                 <TimerRounded fontSize={"small"} /> &nbsp;
-                <span className={`font-bold text-2xl`}>30</span>
+                <span className={`font-bold text-2xl`}>{timer}</span>
                 <span>s</span>
               </div>
             </div>
@@ -199,13 +227,13 @@ export default function Home(): JSX.Element {
                 className={`active:translate-y-1 flex flex-col justify-center items-center`}>
                 <button
                   onClick={reset}
-                  className={`border-b peer flex justify-center items-center text-center gap-1 px-4 py-2 border border-orange-400 bg-orange-100 text-sm duration-100`}
+                  className={`border-b peer flex justify-center items-center text-center gap-1 px-4 py-2 border border-primary-400 bg-primary-100 text-sm duration-100`}
                   type="reset">
                   <RestartAltRounded fontSize={"small"} />
                   <span>Reset</span>
                 </button>
                 <div
-                  className={`w-full border-orange-500 peer-active:border-transparent border-t-[3px] duration-100`}
+                  className={`w-full border-primary-500 peer-active:border-transparent border-t-[3px] duration-100`}
                 />
               </div>
             </div>
