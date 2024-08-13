@@ -1,3 +1,5 @@
+"use client";
+
 import { GitHub, ShareRounded } from "@mui/icons-material";
 import Link from "next/link";
 
@@ -11,14 +13,20 @@ function Navbar(): JSX.Element {
       <div className={`flex justify-between items-center gap-4`}>
         <Link
           title={`view project`}
-          className={`flex justify-center items-center text-center gap-1`}
+          className={`flex relative flex-col justify-center items-start peer text-center`}
           target={"_blank"}
           href={`https://www.github.com/mind0bender/keykap.git`}>
-          <GitHub className={`text-primary-950`} />
-          <span>Github</span>
+          <div className={`flex peer justify-center items-center gap-1`}>
+            <GitHub className={`text-primary-950`} />
+            <span>Github</span>
+          </div>
+          <hr
+            className={`absolute -bottom-1 border-t-2 border-dashed w-0 peer-hover:w-full border-primary-500 duration-200`}
+          />
         </Link>
         <button
           title={`Share`}
+          className={`bg-primary-50 hover:bg-white rounded-full p-2 border border-primary-200 duration-200`}
           onClick={(): void => {
             navigator.share({
               title: "keykap",

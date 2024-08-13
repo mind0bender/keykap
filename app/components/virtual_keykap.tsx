@@ -23,10 +23,11 @@ function VirtualKeyKap({
         gaming && "ring"
       } relative border-primary-400 ring-white rounded-md duration-150`}>
       <kbd
-        className={`w-12 flex flex-col justify-center items-center text-xl rounded-md aspect-square ${
+        className={`w-8 md:w-12 lg:w-16 text-lg flex flex-col justify-center items-center sm:text-xl rounded-md aspect-square ${
           pressed ? (wrong ? "bg-red-400" : "bg-primary-300") : "bg-primary-200"
         }`}>
-        <span className={`absolute text-sm w-full left-2 top-2`}>
+        <span
+          className={`absolute text-xs w-full left-1 top-1 sm:left-1.5 sm:top-1.5`}>
           {shifted ? shiftedChildren && children : shiftedChildren}
         </span>
         <span>

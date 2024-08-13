@@ -22,6 +22,7 @@ import {
   VolumeUpRounded,
 } from "@mui/icons-material";
 import VirtualKeyboard from "./components/virtual_keyboard";
+import Button from "./components/button";
 
 export default function Home(): JSX.Element {
   const [typed, setTyped] = useState<string>("");
@@ -143,110 +144,98 @@ export default function Home(): JSX.Element {
   );
 
   return (
-    <main className={`min-h-screen`}>
-      <Navbar />
-      <div className={`w-full flex justify-center items-center`}>
-        <div className="flex w-full max-w-4xl lg:max-w-6xl flex-col items-center justify-center p-16">
-          <div
-            className={`text-3xl flex items-center justify-between py-4 px-2 w-full font-semibold text-primary-950`}>
-            <span>Typing Test</span>
-            <button
-              onClick={(): void => {
-                setIsMuted((pIM: boolean): boolean => !pIM);
-              }}>
-              {isMuted ? (
-                <VolumeOffRounded titleAccess={`unmute`} />
-              ) : (
-                <VolumeUpRounded titleAccess={`mute`} />
-              )}
-            </button>
-          </div>
-          <div
-            className={`flex flex-col justify-center items-center bg-primary-200 rounded-sm shadow-lg px-10 py-8 gap-4 w-full container`}>
-            <textarea
-              onKeyDown={keyDownHandler}
-              onKeyUp={keyUpHandler}
-              ref={area}
-              autoFocus
-              value={typed}
-              onChange={(e: ChangeEvent<HTMLTextAreaElement>): void => {
-                // checking for max-incorrect-word-length-allowed
-                if (!typed && e.target.value) {
-                  startTimer();
-                }
-                if (typed.length === supposed?.length) {
-                  stopTimer();
-                }
-                const newTypedWordList: string[] = e.target.value.split(" ");
-                const lastWord: string =
-                  newTypedWordList[newTypedWordList.length - 1];
-                if (
-                  lastWord.length > 16 &&
-                  e.target.value[e.target.value.length - 1] !== " "
-                ) {
-                  return;
-                }
-                setTyped(e.target.value);
-              }}
-              className={`scale-0 absolute`}
-            />
-            <code
-              className={`text-lg text-stone-800 text-start whitespace-break-spaces`}>
-              {supposed
-                ?.split("")
-                .map((char: string, idx: number): ReactNode => {
-                  return (
-                    <Letter
-                      active={idx == typed.length}
-                      passed={idx < typed.length}
-                      correct={!typed[idx] || char === typed[idx]}
-                      hint={{
-                        children: char === " " ? <div>∙</div> : char,
-                      }}
-                      key={idx}>
-                      {((): ReactNode => {
-                        const renderedChar: string = typed[idx] || char;
-                        return renderedChar === " " ? <> </> : renderedChar;
-                      })()}
-                    </Letter>
-                  );
-                })}
-            </code>
-            <div className={`flex justify-between w-full text-primary-950`}>
-              <div className={`flex justify-center items-center gap-1`}>
-                <SpeedRounded fontSize={"small"} />
-                <span className={`font-bold text-2xl`}>120</span>
-                <span>WPM</span>
-              </div>
-              <div className={`flex justify-center items-center`}>
-                <TimerRounded fontSize={"small"} /> &nbsp;
-                <span className={`font-bold text-2xl`}>{timer}</span>
-                <span>s</span>
-              </div>
-            </div>
-            <div className={`flex justify-end w-full`}>
-              <div
-                className={`active:translate-y-1 flex flex-col justify-center items-center`}>
-                <button
-                  onClick={reset}
-                  className={`border-b peer flex justify-center items-center text-center gap-1 px-4 py-2 border border-primary-400 bg-primary-100 text-sm duration-100`}
-                  type="reset">
-                  <RestartAltRounded fontSize={"small"} />
-                  <span>Reset</span>
-                </button>
-                <div
-                  className={`w-full border-primary-500 peer-active:border-transparent border-t-[3px] duration-100`}
-                />
-              </div>
-            </div>
-          </div>
-          <VirtualKeyboard
-            className={`py-10`}
-            supposedChar={supposed?.[typed.length - 1]}
-            pressed={keysPressed}
-          />
+    <div className={`w-full flex justify-center items-center`}>
+      <div className="flex w-full max-w-4xl lg:max-w-6xl flex-col items-center justify-center p-16">
+        <div
+          className={`text-3xl flex items-center justify-between py-4 px-2 w-full font-semibold text-primary-950`}>
+          <span>Typing Test</span>
+          <button
+            title={isMuted ? "unmute" : "mute"}
+            className={`flex justify-center items-center active:scale-95 hover:bg-primary-50 rounded-full aspect-square px-3 duration-200 border border-dashed hover:border-primary-500`}
+            onClick={(): void => {
+              setIsMuted((pIM: boolean): boolean => !pIM);
+            }}>
+            {isMuted ? <VolumeOffRounded /> : <VolumeUpRounded />}
+          </button>
         </div>
+        <div
+          className={`flex flex-col justify-center items-center bg-primary-200 rounded-sm shadow-lg px-10 py-8 gap-4 w-full container`}>
+          <textarea
+            onKeyDown={keyDownHandler}
+            onKeyUp={keyUpHandler}
+            ref={area}
+            autoFocus
+            value={typed}
+            onChange={(e: ChangeEvent<HTMLTextAreaElement>): void => {
+              // checking for max-incorrect-word-length-allowed
+              if (!typed && e.target.value) {
+                startTimer();
+              }
+              if (typed.length === supposed?.length) {
+                stopTimer();
+              }
+              const newTypedWordList: string[] = e.target.value.split(" ");
+              const lastWord: string =
+                newTypedWordList[newTypedWordList.length - 1];
+              if (
+                lastWord.length > 16 &&
+                e.target.value[e.target.value.length - 1] !== " "
+              ) {
+                return;
+              }
+              setTyped(e.target.value);
+            }}
+            className={`scale-0 absolute`}
+          />
+          <code
+            className={`text-lg text-stone-800 text-start whitespace-break-spaces`}>
+            {supposed?.split("").map((char: string, idx: number): ReactNode => {
+              return (
+                <Letter
+                  active={idx == typed.length}
+                  passed={idx < typed.length}
+                  correct={!typed[idx] || char === typed[idx]}
+                  hint={{
+                    children: char === " " ? <div>∙</div> : char,
+                  }}
+                  key={idx}>
+                  {((): ReactNode => {
+                    const renderedChar: string = typed[idx] || char;
+                    return renderedChar === " " ? <> </> : renderedChar;
+                  })()}
+                </Letter>
+              );
+            })}
+          </code>
+          <div className={`flex justify-between w-full text-primary-950`}>
+            <div className={`flex justify-center items-center gap-1`}>
+              <SpeedRounded fontSize={"small"} />
+              <span className={`font-bold text-2xl`}>120</span>
+              <abbr className={`no-underline`} title={"Words per minute"}>
+                WPM
+              </abbr>
+            </div>
+            <div className={`flex justify-center items-center`}>
+              <TimerRounded fontSize={"small"} /> &nbsp;
+              <span className={`font-bold text-2xl`}>{timer}</span>
+              <abbr className={`no-underline`} title={"seconds"}>
+                s
+              </abbr>
+            </div>
+          </div>
+          <div className={`flex justify-end w-full`}>
+            <Button onClick={reset}>
+              <RestartAltRounded fontSize={"small"} />
+              <span>Reset</span>
+            </Button>
+          </div>
+        </div>
+        <VirtualKeyboard
+          className={`py-10 hidden sm:block`}
+          supposedChar={supposed?.[typed.length - 1]}
+          pressed={keysPressed}
+        />
       </div>
-    </main>
+    </div>
   );
 }
