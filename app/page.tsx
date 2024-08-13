@@ -43,20 +43,19 @@ export default function Home(): JSX.Element {
     useRef<NodeJS.Timeout | null>(null);
 
   const stopTimer: () => void = useCallback((): void => {
-    timerIntervalRef.current && clearInterval(timerIntervalRef.current);
+    if (timerIntervalRef.current) {
+      console.log(timerIntervalRef.current);
+      clearInterval(timerIntervalRef.current);
+    }
   }, []);
   const startTimer: () => void = useCallback((): void => {
-    const startedAt: Date = new Date();
-    const shouldEndAt: Date = new Date(startedAt);
-    shouldEndAt.setSeconds(startedAt.getSeconds() + timerMaxValue.current);
     timerIntervalRef.current = setInterval((): void => {
-      const now: Date = new Date();
-      const newTimeVal: number = now.getSeconds() - shouldEndAt.getSeconds();
-      if (!newTimeVal) {
-        now.getSeconds() - shouldEndAt.getSeconds();
-        stopTimer();
-      }
-      setTimer(newTimeVal);
+      setTimer((pT: number): number => {
+        if (!(pT - 1)) {
+          stopTimer();
+        }
+        return pT - 1;
+      });
     }, 1000);
   }, [stopTimer]);
 
@@ -181,7 +180,10 @@ export default function Home(): JSX.Element {
                 const newTypedWordList: string[] = e.target.value.split(" ");
                 const lastWord: string =
                   newTypedWordList[newTypedWordList.length - 1];
-                if (lastWord.length > 16) {
+                if (
+                  lastWord.length > 16 &&
+                  e.target.value[e.target.value.length - 1] !== " "
+                ) {
                   return;
                 }
                 setTyped(e.target.value);
