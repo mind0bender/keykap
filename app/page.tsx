@@ -188,7 +188,7 @@ export default function Home(): JSX.Element {
             className={`scale-0 absolute`}
           />
           <code
-            className={`text-lg text-stone-800 text-start whitespace-break-spaces`}>
+            className={`text-lg font-mono text-stone-800 text-start whitespace-break-spaces`}>
             {supposed?.split("").map((char: string, idx: number): ReactNode => {
               return (
                 <Letter
