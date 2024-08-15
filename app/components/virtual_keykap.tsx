@@ -14,6 +14,7 @@ function VirtualKeyKap({
   pressed = false,
   gaming = false,
   wrong = false,
+  square = true,
   shiftedChildren,
   shifted,
 }: VirtualKeyKapProps): JSX.Element {
@@ -23,7 +24,9 @@ function VirtualKeyKap({
         gaming && "ring"
       } relative border-primary-400 ring-white rounded-md duration-150`}>
       <kbd
-        className={`w-8 md:w-12 lg:w-16 text-lg flex flex-col justify-center items-center sm:text-xl rounded-md aspect-square ${
+        className={`h-8 md:h-12 lg:h-16 p-2 md:p-3 text-lg flex flex-col justify-center items-center sm:text-xl rounded-md ${
+          square && "aspect-square"
+        } whitespace-pre ${
           pressed ? (wrong ? "bg-red-400" : "bg-primary-300") : "bg-primary-200"
         }`}>
         <span

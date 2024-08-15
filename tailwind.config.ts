@@ -11,6 +11,7 @@ const config: Config = {
     extend: {
       colors: {
         primary: colors.indigo,
+        error: colors.red,
       },
     },
   },

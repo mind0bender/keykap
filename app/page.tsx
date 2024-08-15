@@ -12,7 +12,7 @@ import {
   useState,
 } from "react";
 import Letter from "./components/letter";
-import Navbar from "./components/navbar";
+import Button from "./components/button";
 import wordlist from "./helper/wordlist.json";
 import {
   RestartAltRounded,
@@ -22,7 +22,7 @@ import {
   VolumeUpRounded,
 } from "@mui/icons-material";
 import VirtualKeyboard from "./components/virtual_keyboard";
-import Button from "./components/button";
+import { clearInterval, setInterval } from "timers";
 
 export default function Home(): JSX.Element {
   const [typed, setTyped] = useState<string>("");
@@ -45,7 +45,6 @@ export default function Home(): JSX.Element {
 
   const stopTimer: () => void = useCallback((): void => {
     if (timerIntervalRef.current) {
-      console.log(timerIntervalRef.current);
       clearInterval(timerIntervalRef.current);
     }
   }, []);
@@ -83,6 +82,10 @@ export default function Home(): JSX.Element {
     setSupposed(getRandomSentence());
   }, [stopTimer]);
 
+  const endTest: () => void = useCallback((): void => {
+    stopTimer();
+  }, [stopTimer]);
+
   const area: RefObject<HTMLTextAreaElement> =
     useRef<HTMLTextAreaElement>(null);
 
@@ -105,14 +108,16 @@ export default function Home(): JSX.Element {
   }, [reset]);
 
   useEffect((): void => {
-    // console.log(typed);
-  }, [typed]);
+    // console.log("s" + supposed + "e");
+  }, [supposed]);
 
   const keyDownHandler: KeyboardEventHandler = useCallback(
     (e: KeyboardEvent): void => {
       // impliment caps and other modifiers
-      // const caps:boolean = e.getModifierState && e.getModifierState("CapsLock");
-      // console.log(caps);
+      const caps: boolean =
+        e.getModifierState && e.getModifierState("CapsLock");
+      console.log(caps);
+
       setKeysPressed((pKP: string[]): string[] => [...pKP, e.key]);
       if (tapAudio.current!.readyState > tapAudio.current!.HAVE_CURRENT_DATA)
         tapAudio.current!.currentTime = 0;
@@ -145,6 +150,9 @@ export default function Home(): JSX.Element {
 
   return (
     <div className={`w-full flex justify-center items-center`}>
+      {/* {keysPressed.map((key: string, idx: number): ReactNode => {
+        return <span key={idx}>{(key === "?") + ""}</span>;
+      })} */}
       <div className="flex w-full max-w-4xl lg:max-w-6xl flex-col items-center justify-center p-16">
         <div
           className={`text-3xl flex items-center justify-between py-4 px-2 w-full font-semibold text-primary-950`}>
@@ -182,6 +190,12 @@ export default function Home(): JSX.Element {
                 e.target.value[e.target.value.length - 1] !== " "
               ) {
                 return;
+              }
+              if (!timer) {
+                return;
+              }
+              if (typed.length === supposed?.length) {
+                endTest();
               }
               setTyped(e.target.value);
             }}
@@ -234,6 +248,7 @@ export default function Home(): JSX.Element {
           className={`py-10 hidden sm:block`}
           supposedChar={supposed?.[typed.length - 1]}
           pressed={keysPressed}
+          locked={!timer}
         />
       </div>
     </div>

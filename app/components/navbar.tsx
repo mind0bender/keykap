@@ -33,11 +33,19 @@ function Navbar({ ...restNavbarProps }: NavbarProps): JSX.Element {
           title={`Share`}
           className={`bg-primary-50 hover:bg-white rounded-full p-2 border border-primary-200 duration-200`}
           onClick={(): void => {
-            navigator.share({
-              title: "keykap",
-              url: "https://keykap.vercel.app/",
-              text: "Can you beat my high score?",
-            });
+            navigator
+              .share({
+                title: "keykap",
+                url: "https://keykap.vercel.app/",
+                text: "Can you beat my high score?",
+              })
+              .then((): void => {
+                console.log("thanks for sharing");
+              })
+              .catch((err: any): void => {
+                console.log("Failed to share");
+                console.error(err);
+              });
           }}>
           <ShareRounded />
         </button>
