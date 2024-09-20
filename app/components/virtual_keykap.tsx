@@ -27,7 +27,11 @@ function VirtualKeyKap({
         className={`h-8 md:h-12 lg:h-16 p-2 md:p-3 text-lg flex flex-col justify-center items-center sm:text-xl rounded-md ${
           square && "aspect-square"
         } whitespace-pre ${
-          pressed ? (wrong ? "bg-red-400" : "bg-primary-300") : "bg-primary-200"
+          pressed
+            ? wrong
+              ? "bg-error-400"
+              : "bg-primary-300"
+            : "bg-primary-200"
         }`}>
         <span
           className={`absolute text-xs w-full left-1 top-1 sm:left-1.5 sm:top-1.5`}>

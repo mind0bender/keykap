@@ -20,8 +20,8 @@ function Letter({
       className={`${active && "border border-b-4 border-primary-900"} ${
         passed && "text-stone-500"
       } ${
-        !correct && "underline text-red-500"
-      } relative decoration-wavy decoration-red-500`}>
+        !correct && "underline text-error-500"
+      } relative decoration-wavy decoration-error-500`}>
       {children}
       {!correct && <Hint {...hint} />}
     </span>

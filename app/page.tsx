@@ -1,32 +1,23 @@
 "use client";
 import {
-  ChangeEvent,
   KeyboardEvent,
   KeyboardEventHandler,
   MutableRefObject,
-  ReactNode,
   RefObject,
   useCallback,
   useEffect,
   useRef,
   useState,
 } from "react";
-import Letter from "./components/letter";
-import Button from "./components/button";
 import wordlist from "./helper/wordlist.json";
-import {
-  RestartAltRounded,
-  SpeedRounded,
-  TimerRounded,
-  VolumeOffRounded,
-  VolumeUpRounded,
-} from "@mui/icons-material";
+import { VolumeOffRounded, VolumeUpRounded } from "@mui/icons-material";
 import VirtualKeyboard from "./components/virtual_keyboard";
 import { clearInterval, setInterval } from "timers";
+import TypingArea from "./components/typingarea";
 
 export default function Home(): JSX.Element {
   const [typed, setTyped] = useState<string>("");
-  const [keysPressed, setKeysPressed] = useState<string[]>([]);
+  const [keysPressed, setKeysPressed] = useState<Set<string>>(new Set());
 
   const [supposed, setSupposed] = useState<string>();
 
@@ -51,7 +42,7 @@ export default function Home(): JSX.Element {
   const startTimer: () => void = useCallback((): void => {
     timerIntervalRef.current = setInterval((): void => {
       setTimer((pT: number): number => {
-        if (!(pT - 1)) {
+        if (pT - 1 <= 0) {
           stopTimer();
         }
         return pT - 1;
@@ -118,7 +109,9 @@ export default function Home(): JSX.Element {
         e.getModifierState && e.getModifierState("CapsLock");
       console.log(caps);
 
-      setKeysPressed((pKP: string[]): string[] => [...pKP, e.key]);
+      setKeysPressed(
+        (pKP: Set<string>): Set<string> => new Set([...pKP, e.key])
+      );
       if (tapAudio.current!.readyState > tapAudio.current!.HAVE_CURRENT_DATA)
         tapAudio.current!.currentTime = 0;
       tapAudio.current!.play();
@@ -141,18 +134,17 @@ export default function Home(): JSX.Element {
 
   const keyUpHandler: KeyboardEventHandler = useCallback(
     (e: KeyboardEvent): void => {
-      setKeysPressed((pKP: string[]): string[] =>
-        pKP.filter((key: string): boolean => e.key != key)
-      );
+      setKeysPressed((pKP: Set<string>): Set<string> => {
+        const a = new Set(pKP);
+        a.delete(e.key);
+        return a;
+      });
     },
     []
   );
 
   return (
     <div className={`w-full flex justify-center items-center`}>
-      {/* {keysPressed.map((key: string, idx: number): ReactNode => {
-        return <span key={idx}>{(key === "?") + ""}</span>;
-      })} */}
       <div className="flex w-full max-w-4xl lg:max-w-6xl flex-col items-center justify-center p-16">
         <div
           className={`text-3xl flex items-center justify-between py-4 px-2 w-full font-semibold text-primary-950`}>
@@ -166,90 +158,32 @@ export default function Home(): JSX.Element {
             {isMuted ? <VolumeOffRounded /> : <VolumeUpRounded />}
           </button>
         </div>
-        <div
-          className={`flex flex-col justify-center items-center bg-primary-200 rounded-sm shadow-lg px-10 py-8 gap-4 w-full container`}>
-          <textarea
-            onKeyDown={keyDownHandler}
-            onKeyUp={keyUpHandler}
-            ref={area}
-            autoFocus
-            value={typed}
-            onChange={(e: ChangeEvent<HTMLTextAreaElement>): void => {
-              // checking for max-incorrect-word-length-allowed
-              if (!typed && e.target.value) {
-                startTimer();
-              }
-              if (typed.length === supposed?.length) {
-                stopTimer();
-              }
-              const newTypedWordList: string[] = e.target.value.split(" ");
-              const lastWord: string =
-                newTypedWordList[newTypedWordList.length - 1];
-              if (
-                lastWord.length > 16 &&
-                e.target.value[e.target.value.length - 1] !== " "
-              ) {
-                return;
-              }
-              if (!timer) {
-                return;
-              }
-              if (typed.length === supposed?.length) {
-                endTest();
-              }
-              setTyped(e.target.value);
-            }}
-            className={`scale-0 absolute`}
-          />
-          <code
-            className={`text-lg font-mono text-stone-800 text-start whitespace-break-spaces`}>
-            {supposed?.split("").map((char: string, idx: number): ReactNode => {
-              return (
-                <Letter
-                  active={idx == typed.length}
-                  passed={idx < typed.length}
-                  correct={!typed[idx] || char === typed[idx]}
-                  hint={{
-                    children: char === " " ? <div>∙</div> : char,
-                  }}
-                  key={idx}>
-                  {((): ReactNode => {
-                    const renderedChar: string = typed[idx] || char;
-                    return renderedChar === " " ? <> </> : renderedChar;
-                  })()}
-                </Letter>
-              );
-            })}
-          </code>
-          <div className={`flex justify-between w-full text-primary-950`}>
-            <div className={`flex justify-center items-center gap-1`}>
-              <SpeedRounded fontSize={"small"} />
-              <span className={`font-bold text-2xl`}>120</span>
-              <abbr className={`no-underline`} title={"Words per minute"}>
-                WPM
-              </abbr>
-            </div>
-            <div className={`flex justify-center items-center`}>
-              <TimerRounded fontSize={"small"} /> &nbsp;
-              <span className={`font-bold text-2xl`}>{timer}</span>
-              <abbr className={`no-underline`} title={"seconds"}>
-                s
-              </abbr>
-            </div>
-          </div>
-          <div className={`flex justify-end w-full`}>
-            <Button onClick={reset}>
-              <RestartAltRounded fontSize={"small"} />
-              <span>Reset</span>
-            </Button>
-          </div>
-        </div>
+        {/* typing area */}
+        <TypingArea
+          ref={area}
+          testData={{
+            endTest,
+            resetTest: reset,
+            supposed,
+            timerMaxValue,
+            typedState: [typed, setTyped],
+          }}
+          timer={{
+            value: timer,
+            startTimer,
+            stopTimer,
+          }}
+          value={typed}
+          onKeyDown={keyDownHandler}
+          onKeyUp={keyUpHandler}
+        />
         <VirtualKeyboard
           className={`py-10 hidden sm:block`}
           supposedChar={supposed?.[typed.length - 1]}
           pressed={keysPressed}
-          locked={!timer}
+          locked={timer <= 0}
         />
+        {JSON.stringify(keysPressed)}
       </div>
     </div>
   );
