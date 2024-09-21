@@ -31,7 +31,7 @@ function Navbar({ ...restNavbarProps }: NavbarProps): JSX.Element {
         </Link>
         <button
           title={`Share`}
-          className={`bg-primary-50 hover:bg-white rounded-full p-2 border border-primary-200 duration-200`}
+          className={`bg-primary-50 hover:bg-white rounded-full p-2 border border-primary-200 duration-200 flex justify-center items-center`}
           onClick={(): void => {
             navigator
               .share({

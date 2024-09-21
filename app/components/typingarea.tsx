@@ -2,15 +2,14 @@ import {
   ChangeEvent,
   Dispatch,
   forwardRef,
-  HTMLAttributes,
   HtmlHTMLAttributes,
   MutableRefObject,
-  PropsWithRef,
   ReactNode,
   Ref,
 } from "react";
 import Letter from "./letter";
 import {
+  GradingRounded,
   RestartAltRounded,
   SpeedRounded,
   TimerRounded,
@@ -31,6 +30,8 @@ interface TestData {
   resetTest: () => void;
   timerMaxValue: MutableRefObject<number>;
   supposed: string | undefined;
+  accuracy: number;
+  wpm: number;
 }
 
 interface TimerInterface {
@@ -51,6 +52,8 @@ function TypingArea(
       resetTest,
       timerMaxValue,
       supposed,
+      accuracy,
+      wpm,
     },
   }: TypingAreaProps,
   ref: Ref<HTMLTextAreaElement>
@@ -111,16 +114,37 @@ function TypingArea(
           );
         })}
       </code>
-      <div className={`flex justify-between w-full text-primary-950`}>
-        <div className={`flex justify-center items-center gap-1`}>
-          <SpeedRounded fontSize={"small"} />
-          <span className={`font-bold text-2xl`}>120</span>
-          <abbr className={`no-underline`} title={"Words per minute"}>
-            WPM
-          </abbr>
+      <div
+        className={`flex justify-between w-full text-primary-950 border-t border-primary-400 pt-4 border-dashed relative`}>
+        <div
+          className={`w-6 aspect-square absolute bg-primary-100 border border-primary-400 border-dashed rounded-full shadow-inner top-0 left-0 -translate-x-1/2 -translate-y-1/2`}
+        />
+        <div
+          className={`w-6 aspect-square absolute bg-primary-100 border border-primary-400 border-dashed rounded-full shadow-inner top-0 right-0 translate-x-1/2 -translate-y-1/2`}
+        />
+        <div className={`flex flex-col justify-center items-start`}>
+          <div
+            className={`flex justify-center items-center gap-1`}
+            title={`speed`}>
+            <SpeedRounded fontSize={"small"} />
+            <span className={`font-bold text-2xl`}>{Math.round(wpm)}</span>
+            <abbr className={`no-underline`} title={"Words per minute"}>
+              WPM
+            </abbr>
+          </div>
+          <div
+            className={`flex justify-center items-center gap-1`}
+            title={`accuracy`}>
+            <GradingRounded fontSize={"small"} />
+            <span className={`font-bold text-2xl`}>{Math.round(accuracy)}</span>
+            <abbr className={`no-underline`} title={"Words per minute"}>
+              %
+            </abbr>
+          </div>
         </div>
         <div className={`flex justify-center items-center`}>
-          <TimerRounded fontSize={"small"} /> &nbsp;
+          <TimerRounded fontSize={"small"} className={`-translate-y-0.5`} />{" "}
+          &nbsp;
           <span className={`font-bold text-2xl font-mono`}>
             {timer
               .toString()

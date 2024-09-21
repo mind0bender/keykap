@@ -6,6 +6,7 @@ import {
   RefObject,
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from "react";
@@ -15,9 +16,27 @@ import VirtualKeyboard from "./components/virtual_keyboard";
 import { clearInterval, setInterval } from "timers";
 import TypingArea from "./components/typingarea";
 
+interface AccuracyCount {
+  correct: number;
+  incorrect: number;
+}
+
 export default function Home(): JSX.Element {
   const [typed, setTyped] = useState<string>("");
   const [keysPressed, setKeysPressed] = useState<Set<string>>(new Set());
+  const [accuracyCounter, setAccuracyCounter] = useState<AccuracyCount>({
+    correct: 0,
+    incorrect: 0,
+  });
+  const [WPM, setWPM] = useState<number>(0);
+  const [accuracy, setAccuracy] = useState<number>(0);
+
+  const getAccuracy: () => number = useCallback((): number => {
+    const acc: number =
+      (accuracyCounter.correct * 100) /
+      (accuracyCounter.correct + accuracyCounter.incorrect);
+    return acc;
+  }, [accuracyCounter]);
 
   const [supposed, setSupposed] = useState<string>();
 
@@ -34,6 +53,25 @@ export default function Home(): JSX.Element {
   const timerIntervalRef: MutableRefObject<NodeJS.Timeout | null> =
     useRef<NodeJS.Timeout | null>(null);
 
+  const getWPM: () => number = useCallback((): number => {
+    const keyStrokeCount: number = typed.length;
+    const wordCount: number = keyStrokeCount / 5;
+    const accuracy: number = getAccuracy();
+    const correctWordCount: number = (wordCount * accuracy) / 100;
+    console.log(
+      keyStrokeCount,
+      correctWordCount,
+      timerMaxValue.current / 60,
+      timer
+    );
+    console.log(timer, (timerMaxValue.current - timer) / 60);
+    return correctWordCount / ((timerMaxValue.current - timer) / 60); // `timer` is the time left for test to end, normally 0 if test has ended
+  }, [getAccuracy, timer, typed]);
+
+  useEffect((): void => {
+    setWPM(getWPM());
+  }, [timer, setWPM, getWPM]);
+
   const stopTimer: () => void = useCallback((): void => {
     if (timerIntervalRef.current) {
       clearInterval(timerIntervalRef.current);
@@ -41,14 +79,13 @@ export default function Home(): JSX.Element {
   }, []);
   const startTimer: () => void = useCallback((): void => {
     timerIntervalRef.current = setInterval((): void => {
-      setTimer((pT: number): number => {
-        if (pT - 1 <= 0) {
-          stopTimer();
-        }
-        return pT - 1;
-      });
+      if (timer - 1 <= 0) {
+        stopTimer();
+      }
+      console.log({ typed });
+      setTimer((pT: number): number => pT - 1);
     }, 1000);
-  }, [stopTimer]);
+  }, [timer, typed, stopTimer]);
 
   const DEFAULT_MIN_WORD_COUNT: number = 12;
   const DEFAULT_MAX_WORD_COUNT: number = 18;
@@ -66,16 +103,21 @@ export default function Home(): JSX.Element {
     }
     return randomWords.join(" ");
   }
-  const reset: () => void = useCallback((): void => {
-    stopTimer();
-    setTimer(timerMaxValue.current);
-    setTyped("");
-    setSupposed(getRandomSentence());
-  }, [stopTimer]);
 
   const endTest: () => void = useCallback((): void => {
     stopTimer();
   }, [stopTimer]);
+
+  const reset: () => void = useCallback((): void => {
+    endTest();
+    setTimer(timerMaxValue.current);
+    setAccuracyCounter({
+      correct: 0,
+      incorrect: 0,
+    });
+    setTyped("");
+    setSupposed(getRandomSentence());
+  }, [endTest]);
 
   const area: RefObject<HTMLTextAreaElement> =
     useRef<HTMLTextAreaElement>(null);
@@ -88,26 +130,27 @@ export default function Home(): JSX.Element {
     tapAudio.current!.muted = isMuted;
   }, [isMuted]);
 
-  useEffect((): void => {
+  useEffect((): (() => void) => {
     window.addEventListener("focus", (): void => {
       area.current?.focus();
     });
     area.current?.addEventListener("blur", (): void => {
       area.current?.focus();
     });
+    // start everything on mount
     reset();
-  }, [reset]);
-
-  useEffect((): void => {
-    // console.log("s" + supposed + "e");
-  }, [supposed]);
+    // stop everything on unmount
+    return (): void => {
+      endTest();
+    };
+  }, [reset, stopTimer, endTest]);
 
   const keyDownHandler: KeyboardEventHandler = useCallback(
     (e: KeyboardEvent): void => {
       // impliment caps and other modifiers
       const caps: boolean =
         e.getModifierState && e.getModifierState("CapsLock");
-      console.log(caps);
+      // console.log(caps);
 
       setKeysPressed(
         (pKP: Set<string>): Set<string> => new Set([...pKP, e.key])
@@ -124,12 +167,32 @@ export default function Home(): JSX.Element {
         case "ArrowLeft":
         case "ArrowDown":
           e.preventDefault();
+          break;
         default:
+          // if (supposed) console.log(supposed[typed.length], e.key);
+          if (supposed && e.key.length == 1) {
+            if (supposed && e.key == supposed[typed.length]) {
+              setAccuracyCounter(
+                (pAcc: AccuracyCount): AccuracyCount => ({
+                  correct: pAcc.correct + 1,
+                  incorrect: pAcc.incorrect,
+                })
+              );
+            } else {
+              setAccuracyCounter(
+                (pAcc: AccuracyCount): AccuracyCount => ({
+                  correct: pAcc.correct,
+                  incorrect: pAcc.incorrect + 1,
+                })
+              );
+            }
+            setAccuracy(getAccuracy());
+          }
           // console.log(e.key);
           break;
       }
     },
-    [reset]
+    [reset, supposed, typed.length, setAccuracy, getAccuracy]
   );
 
   const keyUpHandler: KeyboardEventHandler = useCallback(
@@ -167,6 +230,8 @@ export default function Home(): JSX.Element {
             supposed,
             timerMaxValue,
             typedState: [typed, setTyped],
+            accuracy,
+            wpm: isNaN(WPM) ? 0 : WPM,
           }}
           timer={{
             value: timer,
@@ -183,7 +248,6 @@ export default function Home(): JSX.Element {
           pressed={keysPressed}
           locked={timer <= 0}
         />
-        {JSON.stringify(keysPressed)}
       </div>
     </div>
   );
