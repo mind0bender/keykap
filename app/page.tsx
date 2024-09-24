@@ -32,6 +32,9 @@ export default function Home(): JSX.Element {
   const [accuracy, setAccuracy] = useState<number>(0);
 
   const getAccuracy: () => number = useCallback((): number => {
+    if (!(accuracyCounter.correct + accuracyCounter.incorrect)) {
+      return 0;
+    }
     const acc: number =
       (accuracyCounter.correct * 100) /
       (accuracyCounter.correct + accuracyCounter.incorrect);
@@ -58,18 +61,14 @@ export default function Home(): JSX.Element {
     const wordCount: number = keyStrokeCount / 5;
     const accuracy: number = getAccuracy();
     const correctWordCount: number = (wordCount * accuracy) / 100;
-    console.log(
-      keyStrokeCount,
-      correctWordCount,
-      timerMaxValue.current / 60,
-      timer
-    );
-    console.log(timer, (timerMaxValue.current - timer) / 60);
     return correctWordCount / ((timerMaxValue.current - timer) / 60); // `timer` is the time left for test to end, normally 0 if test has ended
   }, [getAccuracy, timer, typed]);
 
   useEffect((): void => {
     setWPM(getWPM());
+    if (!timer && timerIntervalRef.current) {
+      clearInterval(timerIntervalRef.current);
+    }
   }, [timer, setWPM, getWPM]);
 
   const stopTimer: () => void = useCallback((): void => {
@@ -82,10 +81,9 @@ export default function Home(): JSX.Element {
       if (timer - 1 <= 0) {
         stopTimer();
       }
-      console.log({ typed });
       setTimer((pT: number): number => pT - 1);
     }, 1000);
-  }, [timer, typed, stopTimer]);
+  }, [timer, stopTimer]);
 
   const DEFAULT_MIN_WORD_COUNT: number = 12;
   const DEFAULT_MAX_WORD_COUNT: number = 18;
@@ -115,6 +113,8 @@ export default function Home(): JSX.Element {
       correct: 0,
       incorrect: 0,
     });
+    setAccuracy(0);
+    setWPM(0);
     setTyped("");
     setSupposed(getRandomSentence());
   }, [endTest]);
@@ -169,9 +169,12 @@ export default function Home(): JSX.Element {
           e.preventDefault();
           break;
         default:
-          // if (supposed) console.log(supposed[typed.length], e.key);
-          if (supposed && e.key.length == 1) {
-            if (supposed && e.key == supposed[typed.length]) {
+          if (timer <= 0) {
+            // if locked
+            return; // do not set accuracy counters.
+          }
+          if (supposed && e.key.length === 1) {
+            if (supposed && e.key === supposed[typed.length]) {
               setAccuracyCounter(
                 (pAcc: AccuracyCount): AccuracyCount => ({
                   correct: pAcc.correct + 1,
@@ -192,7 +195,7 @@ export default function Home(): JSX.Element {
           break;
       }
     },
-    [reset, supposed, typed.length, setAccuracy, getAccuracy]
+    [reset, timer, supposed, typed.length, getAccuracy]
   );
 
   const keyUpHandler: KeyboardEventHandler = useCallback(

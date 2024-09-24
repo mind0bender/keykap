@@ -11,7 +11,7 @@ function getRandomSentence(
       DEFAULT_MIN_WORD_COUNT
   )
 ): string {
-  console.log(wordCount);
+  // console.log(wordCount);
 
   let randomWords: string[] = [];
   for (let i: number = 0; i < wordCount; i++) {
