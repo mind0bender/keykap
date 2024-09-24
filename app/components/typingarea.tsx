@@ -9,6 +9,8 @@ import {
 } from "react";
 import Letter from "./letter";
 import {
+  ArrowRightAltRounded,
+  ArrowRightRounded,
   GradingRounded,
   RestartAltRounded,
   SpeedRounded,
@@ -60,7 +62,7 @@ function TypingArea(
 ): JSX.Element {
   return (
     <div
-      className={`flex flex-col justify-center items-center bg-primary-200 rounded-sm shadow-lg px-10 py-8 gap-4 w-full container`}>
+      className={`flex flex-col justify-center items-center bg-primary-200 rounded-sm shadow-lg shadow-primary-50 px-10 py-8 gap-4 w-full container`}>
       <textarea
         onKeyDown={onKeyDown}
         onKeyUp={onKeyUp}
@@ -113,15 +115,18 @@ function TypingArea(
             </Letter>
           );
         })}
+        <ArrowRightAltRounded titleAccess={`Enter`} />
       </code>
-      <div
-        className={`flex justify-between w-full text-primary-950 border-t border-primary-400 pt-4 border-dashed relative`}>
+      <div className={`w-full relative`}>
+        <hr className={`border-1 w-full border-primary-400 border-dashed`} />
         <div
-          className={`w-6 aspect-square absolute bg-primary-100 border border-primary-400 border-dashed rounded-full shadow-inner top-0 left-0 -translate-x-1/2 -translate-y-1/2`}
+          className={`w-6 aspect-square absolute bg-primary-100 border border-primary-400 rounded-full shadow-inner shadow-primary-400 top-0 left-0 -translate-x-1/2 -translate-y-1/2`}
         />
         <div
-          className={`w-6 aspect-square absolute bg-primary-100 border border-primary-400 border-dashed rounded-full shadow-inner top-0 right-0 translate-x-1/2 -translate-y-1/2`}
+          className={`w-6 aspect-square absolute bg-primary-100 border border-primary-400 rounded-full shadow-inner shadow-primary-400 top-0 right-0 translate-x-1/2 -translate-y-1/2`}
         />
+      </div>
+      <div className={`flex justify-between w-full text-primary-950 pt-4`}>
         <div className={`flex flex-col justify-center items-start`}>
           <div
             className={`flex justify-center items-center gap-1`}
@@ -142,7 +147,7 @@ function TypingArea(
             </abbr>
           </div>
         </div>
-        <div className={`flex justify-center items-center`}>
+        <div title={`timer`} className={`flex justify-center items-center`}>
           <TimerRounded fontSize={"small"} className={`-translate-y-0.5`} />{" "}
           &nbsp;
           <span className={`font-bold text-2xl font-mono`}>

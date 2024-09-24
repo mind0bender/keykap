@@ -1,10 +1,7 @@
 import {
   AutoGraphRounded,
-  LegendToggleRounded,
-  SettingsRounded,
   SettingsSuggestRounded,
   SpeedRounded,
-  SsidChartRounded,
 } from "@mui/icons-material";
 import Button from "../components/button";
 import Link from "next/link";

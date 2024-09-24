@@ -13,7 +13,6 @@ import {
 import wordlist from "./helper/wordlist.json";
 import { VolumeOffRounded, VolumeUpRounded } from "@mui/icons-material";
 import VirtualKeyboard from "./components/virtual_keyboard";
-import { clearInterval, setInterval } from "timers";
 import TypingArea from "./components/typingarea";
 
 interface AccuracyCount {
@@ -64,18 +63,22 @@ export default function Home(): JSX.Element {
     return correctWordCount / ((timerMaxValue.current - timer) / 60); // `timer` is the time left for test to end, normally 0 if test has ended
   }, [getAccuracy, timer, typed]);
 
-  useEffect((): void => {
-    setWPM(getWPM());
-    if (!timer && timerIntervalRef.current) {
-      clearInterval(timerIntervalRef.current);
-    }
-  }, [timer, setWPM, getWPM]);
-
   const stopTimer: () => void = useCallback((): void => {
     if (timerIntervalRef.current) {
       clearInterval(timerIntervalRef.current);
+      timerIntervalRef.current = null;
     }
   }, []);
+
+  useEffect((): void => {
+    if (timerIntervalRef.current) {
+      setWPM(getWPM());
+      if (!timer) {
+        stopTimer();
+      }
+    }
+  }, [timer, setWPM, getWPM, stopTimer]);
+
   const startTimer: () => void = useCallback((): void => {
     timerIntervalRef.current = setInterval((): void => {
       if (timer - 1 <= 0) {
@@ -169,9 +172,9 @@ export default function Home(): JSX.Element {
           e.preventDefault();
           break;
         default:
-          if (timer <= 0) {
-            // if locked
-            return; // do not set accuracy counters.
+          if (!timerIntervalRef.current) {
+            // if test ended
+            return; // do not change accuracy counters.
           }
           if (supposed && e.key.length === 1) {
             if (supposed && e.key === supposed[typed.length]) {
