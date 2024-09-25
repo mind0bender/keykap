@@ -1,12 +1,14 @@
 import { PropsWithChildren } from "react";
 import VirtualKeyKap from "./virtual_keykap";
 import { LockRounded } from "@mui/icons-material";
+import VirtualModifierKaps, { KeyboardModifiers } from "./modifiers";
 
 interface VirtualKeyboardProps extends PropsWithChildren {
   pressed: Set<string>;
   supposedChar?: string;
   className?: string;
   locked?: boolean;
+  keyboardModifierStates: KeyboardModifiers;
 }
 
 function VirtualKeyboard({
@@ -14,11 +16,17 @@ function VirtualKeyboard({
   supposedChar,
   className,
   locked = true,
+  keyboardModifierStates,
 }: VirtualKeyboardProps): JSX.Element {
   return (
     <div className={className}>
       <div
-        className={`relative flex flex-col justify-center items-center gap-2 p-8`}>
+        className={`relative flex flex-col justify-center items-center gap-2 px-8 py-4`}>
+        <div className={`pb-4`}>
+          <VirtualModifierKaps
+            keyboardModifierStates={keyboardModifierStates}
+          />
+        </div>
         <div
           className={`absolute z-10 flex-col cursor-not-allowed shadow-inner shadow-white justify-center items-center rounded-md top-0 left-0 w-full h-full backdrop-blur-sm bg-opacity-50 border border-primary-400 ${
             locked ? "flex" : "hidden"

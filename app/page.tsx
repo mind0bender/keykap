@@ -6,7 +6,6 @@ import {
   RefObject,
   useCallback,
   useEffect,
-  useMemo,
   useRef,
   useState,
 } from "react";
@@ -14,6 +13,7 @@ import wordlist from "./helper/wordlist.json";
 import { VolumeOffRounded, VolumeUpRounded } from "@mui/icons-material";
 import VirtualKeyboard from "./components/virtual_keyboard";
 import TypingArea from "./components/typingarea";
+import { KeyboardModifiers } from "./components/modifiers";
 
 interface AccuracyCount {
   correct: number;
@@ -23,6 +23,22 @@ interface AccuracyCount {
 export default function Home(): JSX.Element {
   const [typed, setTyped] = useState<string>("");
   const [keysPressed, setKeysPressed] = useState<Set<string>>(new Set());
+  const [KeyboardModifiers, setKeyboardModifiers] = useState<KeyboardModifiers>(
+    {
+      capsLock: false,
+      numLock: false,
+      shift: false,
+      ctrl: false,
+      alt: false,
+      arrow: {
+        up: false,
+        right: false,
+        down: false,
+        left: false,
+      },
+    }
+  );
+
   const [accuracyCounter, setAccuracyCounter] = useState<AccuracyCount>({
     correct: 0,
     incorrect: 0,
@@ -50,7 +66,7 @@ export default function Home(): JSX.Element {
 
   const [isMuted, setIsMuted] = useState<boolean>(false);
 
-  const timerMaxValue: MutableRefObject<number> = useRef<number>(30);
+  const timerMaxValue: MutableRefObject<number> = useRef<number>(10);
   const [timer, setTimer] = useState<number>(timerMaxValue.current);
   const timerIntervalRef: MutableRefObject<NodeJS.Timeout | null> =
     useRef<NodeJS.Timeout | null>(null);
@@ -74,10 +90,14 @@ export default function Home(): JSX.Element {
     if (timerIntervalRef.current) {
       setWPM(getWPM());
       if (!timer) {
+        console.log("Stopping");
         stopTimer();
       }
     }
-  }, [timer, setWPM, getWPM, stopTimer]);
+    console.log({ timerInterval: timerIntervalRef.current });
+    // I only want the wpm state to update at 1 Hz, not on every keystroke.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [timer]);
 
   const startTimer: () => void = useCallback((): void => {
     timerIntervalRef.current = setInterval((): void => {
@@ -150,17 +170,28 @@ export default function Home(): JSX.Element {
 
   const keyDownHandler: KeyboardEventHandler = useCallback(
     (e: KeyboardEvent): void => {
-      // impliment caps and other modifiers
-      const caps: boolean =
-        e.getModifierState && e.getModifierState("CapsLock");
-      // console.log(caps);
+      let caps: boolean = e.getModifierState("CapsLock");
+      if (e.code === "CapsLock") {
+        caps = !caps;
+      }
+      setKeyboardModifiers(
+        (pKM: KeyboardModifiers): KeyboardModifiers => ({
+          ...pKM,
+          capsLock: caps,
+        })
+      );
 
       setKeysPressed(
         (pKP: Set<string>): Set<string> => new Set([...pKP, e.key])
       );
       if (tapAudio.current!.readyState > tapAudio.current!.HAVE_CURRENT_DATA)
         tapAudio.current!.currentTime = 0;
-      tapAudio.current!.play();
+      try {
+        tapAudio.current!.play();
+      } catch (err: unknown) {
+        console.error("cannot play audio");
+        console.error(err);
+      }
       switch (e.key) {
         case "Tab":
           reset();
@@ -198,7 +229,7 @@ export default function Home(): JSX.Element {
           break;
       }
     },
-    [reset, timer, supposed, typed.length, getAccuracy]
+    [reset, supposed, typed.length, getAccuracy]
   );
 
   const keyUpHandler: KeyboardEventHandler = useCallback(
@@ -214,9 +245,9 @@ export default function Home(): JSX.Element {
 
   return (
     <div className={`w-full flex justify-center items-center`}>
-      <div className="flex w-full max-w-4xl lg:max-w-6xl flex-col items-center justify-center p-16">
+      <div className="flex w-full max-w-4xl lg:max-w-6xl flex-col items-center justify-center p-8 gap-8">
         <div
-          className={`text-3xl flex items-center justify-between py-4 px-2 w-full font-semibold text-primary-950`}>
+          className={`sm:text-2xl text-lg flex items-center justify-between p-2 w-full font-semibold text-primary-950`}>
           <span>Typing Test</span>
           <button
             title={isMuted ? "unmute" : "mute"}
@@ -227,7 +258,6 @@ export default function Home(): JSX.Element {
             {isMuted ? <VolumeOffRounded /> : <VolumeUpRounded />}
           </button>
         </div>
-        {/* typing area */}
         <TypingArea
           ref={area}
           testData={{
@@ -249,10 +279,11 @@ export default function Home(): JSX.Element {
           onKeyUp={keyUpHandler}
         />
         <VirtualKeyboard
-          className={`py-10 hidden sm:block`}
+          className={`hidden sm:block`}
           supposedChar={supposed?.[typed.length - 1]}
           pressed={keysPressed}
           locked={timer <= 0}
+          keyboardModifierStates={KeyboardModifiers}
         />
       </div>
     </div>

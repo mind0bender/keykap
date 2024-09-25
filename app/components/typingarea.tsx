@@ -3,14 +3,15 @@ import {
   Dispatch,
   forwardRef,
   HtmlHTMLAttributes,
+  KeyboardEvent,
   MutableRefObject,
   ReactNode,
   Ref,
 } from "react";
 import Letter from "./letter";
 import {
+  AllInclusiveRounded,
   ArrowRightAltRounded,
-  ArrowRightRounded,
   GradingRounded,
   RestartAltRounded,
   SpeedRounded,
@@ -44,9 +45,6 @@ interface TimerInterface {
 
 function TypingArea(
   {
-    onKeyUp,
-    onKeyDown,
-    value,
     timer: { value: timer, startTimer, stopTimer },
     testData: {
       typedState: [typed, setTyped],
@@ -57,26 +55,25 @@ function TypingArea(
       accuracy,
       wpm,
     },
+    ...rest
   }: TypingAreaProps,
   ref: Ref<HTMLTextAreaElement>
 ): JSX.Element {
   return (
     <div
-      className={`flex flex-col justify-center items-center bg-primary-200 rounded-sm shadow-lg shadow-primary-50 px-10 py-8 gap-4 w-full container`}>
+      className={`flex flex-col justify-center items-center bg-primary-200 rounded-sm shadow-md shadow-primary-300 px-10 py-8 gap-2 w-full container`}>
       <textarea
-        onKeyDown={onKeyDown}
-        onKeyUp={onKeyUp}
         ref={ref}
         autoFocus
-        value={value}
         onChange={(e: ChangeEvent<HTMLTextAreaElement>): void => {
+          rest.onChange && rest.onChange(e);
           if (!typed && e.target.value) {
             startTimer();
           }
           if (typed.length === supposed?.length) {
             stopTimer();
           }
-          // checking for max-incorrect-word-length-allowed
+          // checking for max-incorrect-word-length-allowed (16)
           const newTypedWordList: string[] = e.target.value.split(" ");
           const lastWord: string =
             newTypedWordList[newTypedWordList.length - 1];
@@ -94,10 +91,11 @@ function TypingArea(
           }
           setTyped(e.target.value);
         }}
-        className={`scale-0 absolute`}
+        className={`scale-0 absolute ${rest.className}`}
+        {...rest}
       />
       <code
-        className={`text-lg font-mono text-stone-800 text-start whitespace-break-spaces min-h-28`}>
+        className={`text-base sm:text-lg font-mono text-stone-800 text-start whitespace-break-spaces min-h-28`}>
         {supposed?.split("").map((char: string, idx: number): ReactNode => {
           return (
             <Letter
@@ -132,19 +130,31 @@ function TypingArea(
             className={`flex justify-center items-center gap-1`}
             title={`speed`}>
             <SpeedRounded fontSize={"small"} />
-            <span className={`font-bold text-2xl`}>{Math.round(wpm)}</span>
-            <abbr className={`no-underline`} title={"Words per minute"}>
-              WPM
-            </abbr>
+            <span className={`flex justify-center items-baseline gap-1`}>
+              <span className={`font-bold text-lg sm:text-xl lg:text-2xl`}>
+                {wpm === Infinity ? <AllInclusiveRounded /> : Math.round(wpm)}
+              </span>
+              <abbr
+                className={`no-underline text-sm sm:text-sm`}
+                title={"Words per minute"}>
+                WPM
+              </abbr>
+            </span>
           </div>
           <div
             className={`flex justify-center items-center gap-1`}
             title={`accuracy`}>
             <GradingRounded fontSize={"small"} />
-            <span className={`font-bold text-2xl`}>{Math.round(accuracy)}</span>
-            <abbr className={`no-underline`} title={"Words per minute"}>
-              %
-            </abbr>
+            <span className={`flex justify-center items-baseline gap-1`}>
+              <span className={`font-bold text-lg sm:text-xl lg:text-2xl`}>
+                {Math.round(accuracy)}
+              </span>
+              <abbr
+                className={`no-underline text-sm sm:text-sm`}
+                title={"Words per minute"}>
+                %
+              </abbr>
+            </span>
           </div>
         </div>
         <div title={`timer`} className={`flex justify-center items-center`}>

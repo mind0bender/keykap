@@ -1,6 +1,6 @@
-import { PropsWithChildren, ReactNode } from "react";
+import { HTMLAttributes, ReactNode } from "react";
 
-interface VirtualKeyKapProps extends PropsWithChildren {
+interface VirtualKeyKapProps extends HTMLAttributes<HTMLDivElement> {
   pressed?: boolean;
   gaming?: boolean;
   wrong?: boolean;
@@ -17,24 +17,24 @@ function VirtualKeyKap({
   square = true,
   shiftedChildren,
   shifted,
+  ...rest
 }: VirtualKeyKapProps): JSX.Element {
   return (
     <div
       className={`${pressed ? "border-b-0 translate-y-1" : "border-b-4"} ${
         gaming && "ring"
-      } relative border-primary-400 ring-white rounded-md duration-150`}>
+      } ${
+        pressed ? (wrong ? "bg-error-400" : "bg-primary-300") : "bg-primary-200"
+      } relative border-primary-400 ring-white rounded-md duration-150 ${
+        rest.className
+      }`}
+      {...rest}>
       <kbd
-        className={`h-8 md:h-12 lg:h-16 p-2 md:p-3 text-lg flex flex-col justify-center items-center sm:text-xl rounded-md ${
+        className={`h-8 md:h-12 lg:h-16 p-2 md:p-3 text-base sm:text-l flex flex-col justify-center items-center rounded-md ${
           square && "aspect-square"
-        } whitespace-pre ${
-          pressed
-            ? wrong
-              ? "bg-error-400"
-              : "bg-primary-300"
-            : "bg-primary-200"
-        }`}>
+        } whitespace-pre flex justify-center items-center text-center`}>
         <span
-          className={`absolute text-xs w-full left-1 top-1 sm:left-1.5 sm:top-1.5`}>
+          className={`absolute text-[0.5rem] w-full left-1 top-1 sm:top-[0.01rem]`}>
           {shifted ? shiftedChildren && children : shiftedChildren}
         </span>
         <span>
