@@ -66,7 +66,7 @@ export default function Home(): JSX.Element {
 
   const [isMuted, setIsMuted] = useState<boolean>(false);
 
-  const timerMaxValue: MutableRefObject<number> = useRef<number>(10);
+  const timerMaxValue: MutableRefObject<number> = useRef<number>(30);
   const [timer, setTimer] = useState<number>(timerMaxValue.current);
   const timerIntervalRef: MutableRefObject<NodeJS.Timeout | null> =
     useRef<NodeJS.Timeout | null>(null);

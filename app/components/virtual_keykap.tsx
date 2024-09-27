@@ -30,8 +30,8 @@ function VirtualKeyKap({
       }`}
       {...rest}>
       <kbd
-        className={`h-8 md:h-12 lg:h-16 p-2 md:p-3 text-base sm:text-l flex flex-col justify-center items-center rounded-md ${
-          square && "aspect-square"
+        className={`h-6 md:h-8 lg:h-12 p-2 md:p-3 text-base sm:text-l flex flex-col justify-center items-center rounded-md ${
+          square ? "aspect-square" : "min-w-6 md:min-w-8 lg:min-w-12"
         } whitespace-pre flex justify-center items-center text-center`}>
         <span
           className={`absolute text-[0.5rem] w-full left-1 top-1 sm:top-[0.01rem]`}>
