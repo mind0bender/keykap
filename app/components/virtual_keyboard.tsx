@@ -22,11 +22,6 @@ function VirtualKeyboard({
     <div className={className}>
       <div
         className={`relative flex flex-col justify-center items-center gap-2 px-8 py-4`}>
-        <div className={`pb-4`}>
-          <VirtualModifierKaps
-            keyboardModifierStates={keyboardModifierStates}
-          />
-        </div>
         <div
           className={`absolute z-10 flex-col cursor-not-allowed shadow-inner shadow-white justify-center items-center rounded-md top-0 left-0 w-full h-full backdrop-blur-sm bg-opacity-50 border border-primary-400 ${
             locked ? "flex" : "hidden"
@@ -261,6 +256,11 @@ function VirtualKeyboard({
             wrong={locked || supposedChar !== " "}>
             {"      _____      "}
           </VirtualKeyKap>
+        </div>
+        <div className={`pt-4`}>
+          <VirtualModifierKaps
+            keyboardModifierStates={keyboardModifierStates}
+          />
         </div>
       </div>
     </div>

@@ -1,5 +1,6 @@
 "use client";
 import {
+  FocusEvent,
   KeyboardEvent,
   KeyboardEventHandler,
   MutableRefObject,
@@ -65,6 +66,7 @@ export default function Home(): JSX.Element {
   );
 
   const [isMuted, setIsMuted] = useState<boolean>(false);
+  const [isFocused, setIsFocused] = useState<boolean>(true);
 
   const timerMaxValue: MutableRefObject<number> = useRef<number>(30);
   const [timer, setTimer] = useState<number>(timerMaxValue.current);
@@ -94,7 +96,6 @@ export default function Home(): JSX.Element {
         stopTimer();
       }
     }
-    console.log({ timerInterval: timerIntervalRef.current });
     // I only want the wpm state to update at 1 Hz, not on every keystroke.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [timer]);
@@ -243,6 +244,30 @@ export default function Home(): JSX.Element {
     []
   );
 
+  useEffect((): (() => void) => {
+    if (isFocused) {
+      if (!timerIntervalRef.current && timer !== timerMaxValue.current) {
+        startTimer();
+      }
+      if (document.activeElement !== area.current) {
+        area.current?.focus();
+        console.log("trying to focus");
+      }
+    } else {
+      stopTimer();
+      setKeysPressed(new Set());
+    }
+
+    return (): void => {};
+  }, [isFocused, timer, startTimer, stopTimer]);
+
+  const onFocusChangeHandler: (e: FocusEvent) => void = useCallback(
+    (e: FocusEvent): void => {
+      setIsFocused(document.hasFocus());
+    },
+    []
+  );
+
   return (
     <div className={`w-full flex justify-center items-center`}>
       <div className="flex w-full max-w-4xl lg:max-w-6xl flex-col items-center justify-center p-8 gap-8">
@@ -277,14 +302,18 @@ export default function Home(): JSX.Element {
           value={typed}
           onKeyDown={keyDownHandler}
           onKeyUp={keyUpHandler}
+          onFocus={onFocusChangeHandler}
+          onBlur={onFocusChangeHandler}
         />
         <VirtualKeyboard
           className={`hidden sm:block`}
           supposedChar={supposed?.[typed.length - 1]}
           pressed={keysPressed}
-          locked={timer <= 0}
+          locked={!timerIntervalRef.current || !isFocused}
           keyboardModifierStates={KeyboardModifiers}
         />
+        {timerIntervalRef.current + ""}
+        {isFocused + ""}
       </div>
     </div>
   );

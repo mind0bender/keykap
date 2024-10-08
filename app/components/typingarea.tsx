@@ -108,7 +108,7 @@ function TypingArea(
               key={idx}>
               {((): ReactNode => {
                 const renderedChar: string = typed[idx] || char;
-                return renderedChar === " " ? <> </> : renderedChar;
+                return renderedChar === " " ? <span> </span> : renderedChar;
               })()}
             </Letter>
           );
@@ -159,17 +159,19 @@ function TypingArea(
               </span>
             </div>
           </div>
-          <div title={`timer`} className={`flex justify-center items-center`}>
-            <TimerRounded fontSize={"small"} className={`-translate-y-0.5`} />{" "}
-            &nbsp;
-            <span className={`font-bold text-2xl font-mono`}>
-              {timer
-                .toString()
-                .padStart(timerMaxValue.current.toString().length, "0")}
-            </span>
-            <abbr className={`no-underline`} title={"seconds"}>
-              s
-            </abbr>
+          <div className={`flex justify-center items-cente`}>
+            <div title={`timer`} className={`flex justify-center items-center`}>
+              <TimerRounded fontSize={"small"} className={`-translate-y-0.5`} />{" "}
+              &nbsp;
+              <span className={`font-bold text-2xl font-mono`}>
+                {timer
+                  .toString()
+                  .padStart(timerMaxValue.current.toString().length, "0")}
+              </span>
+              <abbr className={`no-underline`} title={"seconds"}>
+                s
+              </abbr>
+            </div>
           </div>
         </div>
         <div className={`flex justify-end w-full`}>

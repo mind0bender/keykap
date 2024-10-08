@@ -29,11 +29,13 @@ function VirtualModifierKaps({
   return (
     <div {...rest}>
       <div className={`flex flex-col justify-center items-center`}>
-        <VirtualKeyKap pressed={keyboardModifierStates.capsLock} square={false}>
+        <VirtualKeyKap
+          className={`py-1`}
+          pressed={keyboardModifierStates.capsLock}
+          square={false}>
           <KeyboardCapslockRounded className={`text-base sm:text-2xl`} />
-          <br />
+          <span className={`text-sm`}>CapsLock</span>
         </VirtualKeyKap>
-        <span className={`text-sm`}>CapsLock</span>
       </div>
     </div>
   );

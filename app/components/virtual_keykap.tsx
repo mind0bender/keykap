@@ -21,14 +21,14 @@ function VirtualKeyKap({
 }: VirtualKeyKapProps): JSX.Element {
   return (
     <div
+      {...rest}
       className={`${pressed ? "border-b-0 translate-y-1" : "border-b-4"} ${
         gaming && "ring"
       } ${
         pressed ? (wrong ? "bg-error-400" : "bg-primary-300") : "bg-primary-200"
       } relative border-primary-400 ring-white rounded-md duration-150 ${
         rest.className
-      }`}
-      {...rest}>
+      }`}>
       <kbd
         className={`h-6 md:h-8 lg:h-12 p-2 md:p-3 text-base sm:text-l flex flex-col justify-center items-center rounded-md ${
           square ? "aspect-square" : "min-w-6 md:min-w-8 lg:min-w-12"
