@@ -15,6 +15,7 @@ import { VolumeOffRounded, VolumeUpRounded } from "@mui/icons-material";
 import VirtualKeyboard from "./components/virtual_keyboard";
 import TypingArea from "./components/typingarea";
 import { KeyboardModifiers } from "./components/modifiers";
+import { useParams, useSearchParams } from "next/navigation";
 
 interface AccuracyCount {
   correct: number;
@@ -68,7 +69,10 @@ export default function Home(): JSX.Element {
   const [isMuted, setIsMuted] = useState<boolean>(false);
   const [isFocused, setIsFocused] = useState<boolean>(true);
 
-  const timerMaxValue: MutableRefObject<number> = useRef<number>(30);
+  const searchParams = useSearchParams();
+  const timerMaxValue: MutableRefObject<number> = useRef<number>(
+    parseInt(searchParams.get("time") || "") || 30
+  );
   const [timer, setTimer] = useState<number>(timerMaxValue.current);
   const timerIntervalRef: MutableRefObject<NodeJS.Timeout | null> =
     useRef<NodeJS.Timeout | null>(null);
@@ -82,14 +86,14 @@ export default function Home(): JSX.Element {
   }, [getAccuracy, timer, typed]);
 
   const stopTimer: () => void = useCallback((): void => {
-    if (timerIntervalRef.current) {
+    if (timerIntervalRef.current !== null) {
       clearInterval(timerIntervalRef.current);
       timerIntervalRef.current = null;
     }
   }, []);
 
   useEffect((): void => {
-    if (timerIntervalRef.current) {
+    if (timerIntervalRef.current !== null) {
       setWPM(getWPM());
       if (!timer) {
         console.log("Stopping");
@@ -101,12 +105,15 @@ export default function Home(): JSX.Element {
   }, [timer]);
 
   const startTimer: () => void = useCallback((): void => {
+    console.log("before:", timerIntervalRef.current);
+
     timerIntervalRef.current = setInterval((): void => {
       if (timer - 1 <= 0) {
         stopTimer();
       }
       setTimer((pT: number): number => pT - 1);
     }, 1000);
+    console.log("after:", timerIntervalRef.current);
   }, [timer, stopTimer]);
 
   const DEFAULT_MIN_WORD_COUNT: number = 12;
@@ -246,7 +253,11 @@ export default function Home(): JSX.Element {
 
   useEffect((): (() => void) => {
     if (isFocused) {
-      if (!timerIntervalRef.current && timer !== timerMaxValue.current) {
+      if (
+        !timerIntervalRef.current &&
+        timer !== timerMaxValue.current &&
+        !(timer - 1)
+      ) {
         startTimer();
       }
       if (document.activeElement !== area.current) {
@@ -313,7 +324,6 @@ export default function Home(): JSX.Element {
           keyboardModifierStates={KeyboardModifiers}
         />
         {timerIntervalRef.current + ""}
-        {isFocused + ""}
       </div>
     </div>
   );
